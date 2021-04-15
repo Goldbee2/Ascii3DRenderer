@@ -1,11 +1,13 @@
 from array import *
+import signal
+import sys
 
 class Window:
     _window_width=80
     _window_height=24
     
     window = []
-    
+
     def __init__(self):
         for row in range(self._window_height):
             thisRow = []
@@ -31,4 +33,9 @@ class Window:
 
 if __name__ == '__main__':
     window = Window()
-    window.display_frame()
+    while True:
+        try:
+            window.display_frame()
+        except KeyboardInterrupt:
+            print('Closing...')
+            sys.exit(0)
