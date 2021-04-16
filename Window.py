@@ -2,28 +2,53 @@ from array import *
 import signal
 import sys
 
-class Window:
-    _window_width=80
-    _window_height=24
+class Window :
+
+    #ASCII grayscale march, credit to Paul Bourke
+    _ascii_grayscale="$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
+    
+    #The string to be printed to the console.
+    _output_string=""
+
+    #The windows dimensions in pixels TODO: accommodate resizing of window
+    _window_width=800
+    _window_height=600
+
+    #Each character's width in internal pixels cast.
+    _character_width=4
+    _character_height=6
     
     window = []
 
+    _kernel = []
+
     def __init__(self):
+        self._create_kernel()
         for row in range(self._window_height):
             thisRow = []
             for column in range(self._window_width):
-                thisRow.append(" ")
+                thisRow.append(0)
             self.window.append(thisRow)
+    
+    def _create_kernel(self) :
+        for row in range(self._character_height):
+            for column in range(self._character_width):
+                self._kernel.append(1/(self._character_height*self._character_width))
+
+    def compute_characters_from_pixels(self):
+        return(
+            self._window_height//self._character_height, 
+            self._window_width//self._character_width)
 
     def display_frame(self):
-        for row in self.window:
-            for pixel in row:
-                print(pixel, end="")
-            print()
+        #TODO: set cursor to the back
+        print(self._output_string)
             
-
     def set_pixel(self, x, y, char):
         self.window[x][y] = char
+
+
+    # getters and setters
 
     def get_window_width(self):
         return _window_width
@@ -31,11 +56,19 @@ class Window:
     def get_window_height(self):
         return _window_height
 
+    def set_character_height(self, new_height):
+        self._character_height = new_height
+    
+    def set_character_width(self, new_width):
+        self._character_width = new_width
+
+
 if __name__ == '__main__':
     window = Window()
     while True:
         try:
             window.display_frame()
+            
         except KeyboardInterrupt:
             print('Closing...')
             sys.exit(0)
