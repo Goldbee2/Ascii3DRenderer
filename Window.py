@@ -7,7 +7,7 @@ class Window :
 
     #ASCII grayscale march, credit to Paul Bourke
     _ascii_grayscale="$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
-    
+    #goes like this: if >previousbrightness and LE next one, it gets that ones character#
     #The string to be printed to the console.
     _output_string=""
 
