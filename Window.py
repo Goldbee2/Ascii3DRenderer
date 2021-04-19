@@ -1,6 +1,7 @@
 from array import *
 import signal
 import sys
+from Camera import Camera
 
 class Window :
 
@@ -43,9 +44,6 @@ class Window :
     def display_frame(self):
         #TODO: set cursor to the back
         print(self._output_string)
-            
-    def set_pixel(self, x, y, char):
-        self.window[x][y] = char
 
 
     # getters and setters
@@ -65,6 +63,7 @@ class Window :
 
 if __name__ == '__main__':
     window = Window()
+    camera = Camera(800, 600)
     while True:
         try:
             window.display_frame()
