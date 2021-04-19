@@ -2,6 +2,7 @@ import math
 
 class Camera :
     
+    # stores view as array of brightness values.
     camera_view = []
     scene = None
 
@@ -13,46 +14,54 @@ class Camera :
                new_row.append(0) 
             self.camera_view.append(new_row)
 
-    
-
-    # stores view as array of brightness values.
-
-    # okay I have a bunch of objects with points relative to their origin, and where there origin is located relative to the global origin.
-    # thank you to songho.ca/opengl/gl_camera for help understanding camera transformation matrices.
-
-
-    #casts primary ray through center of each pixel
+     #casts primary ray through center of each pixel
     def generate_frame(self):
         for x in range(len(self.camera_view)):
             for y in range(len(self.camera_view[0])):
                 ray = primary_ray(x, y)
-                cast(None)
+                camera_view[x][y] = brightness_from_cast(ray, scene)
     
-    #checks every object for intersections
-    def cast(self, ray):
-        for object in scene:
-            for polygon in object:
-                # if normal is not facing away from us, or if normal is not at orthogonal angle,
-                #    (angle between ray and normal is between pi/2 and 3pi/2,)
-                #    ?and if at least one point within distance cutoff?:
-                #    see if it's within the shape.
-                #    how to tell this: if a ray, cast in a single direction, intersects shape boundaries an odd number of times
-                # if it is,
-                    #closest intersection = max (closest intersection, new intersection)
-                        #NOTE: should be stored as a shape struct and a distance between intersection and origin.
-                #depth = distance from origin
+    
+    # returns a brightness value
+    #NOTE: in total, the brightness of a pixel consists of: angle to light, distance from light->light's distance function,
+    #           if it's in shadow, and distance from origin
 
-        #shoot shadow ray from intersection to light
+    def brightness_from_cast(self, ray):
+        # shoots primary ray, look for intersection
+        intersection, intersection_normal, depth = find_nearest_intersection(ray)
+        # shoot shadow ray from intersection to light
         for light in scene:
             pass
             #cast ray to light
             #if it's not obstructed, brightness of light = brightness of light -> individual light's distance function.
             #if intersection, is in shadow. ?brightness *= 0.5?
 
-#NOTE: in total, the brightness of a pixel consists of: angle to light, distance from light->light's distance function
-#           , if it's in shadow, and distance from origin
+    #returns point, its normal, and its distance as a tuple
+    def find_nearest_intersection(self, ray, scene) :
+        closest_intersection = (-1, -1, -1)
+        closest_distance = 999 #TODO: set to max distance for depth falloff
+        for object in scene:
+            for triangle in object: #for each face
+                # compute plane's normal
+                normal = None
+                # if normal is not facing away from us, or if normal is not at orthogonal angle,
+                #    (angle between ray and normal is between pi/2 and 3pi/2,)
+                #    ?and if at least one point within distance cutoff?:
+                this_point, intersection_distance = ray_intersects(ray, triangle)
+                if intersection_distance < closest_distance:
+                    closest_intersection = this_point
+                        #NOTE: should be stored as a point in space, its face normal, distance to origin.
 
-    
+
+    #ray_intersects: returns point as (x, y, z, normal) and distance to intersection origin.
+    def ray_intersects(self, ray, vertices, normal):
+        pass
+        # check if ray and plane are parallel
+        # compute distance from origin to point being checked
+        # compute distance from origin to plane(parallel to plane's normal)
+        # check if triangle is behind the ray
+        # compute intersection point using distances calculated prev.
+        # inside-outside test with polygon's edges.    
 
     def primary_ray(self, x, y) :
         #return vector representing ray through center of pixel (x,y)?
@@ -61,8 +70,9 @@ class Camera :
     def shadow_ray(self, pointA, pointB):
         pass
 
-    #row-major ordered. X, Y, Z, Translation
-    #defaults to identity matrix (no change)
+    # row-major ordered. X, Y, Z, Translation
+    # defaults to identity matrix (no change)
+    # thank you to songho.ca/opengl/gl_camera for help understanding camera transformation matrices.
     camera_transformation_matrix = [[1, 0, 0, 0],
                                     [0, 1, 0, 0],
                                     [0, 0, 1, 0],
