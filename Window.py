@@ -2,6 +2,7 @@ from array import *
 import signal
 import sys
 from Camera import Camera
+from Scene import Scene
 
 class Window :
 
@@ -63,6 +64,8 @@ class Window :
 
 if __name__ == '__main__':
     window = Window()
+    window.scene = Scene()
+    window.scene.insert_object(None, None)#TODO: insert object
     camera = Camera(800, 600)
     while True:
         try:
