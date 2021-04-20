@@ -64,9 +64,9 @@ class Window :
 
 if __name__ == '__main__':
     window = Window()
-    window.scene = Scene()
-    window.scene.insert_object(None, None)#TODO: insert object
-    camera = Camera(800, 600)
+    scene = Scene()
+    camera = Camera(800, 600, scene)
+    camera.scene.insert_object([[[0, 0, 0], [0, 0, 0], [0,0,0]]], (0, 0, -2))#TODO: insert object
     while True:
         try:
             window.display_frame()
