@@ -1,6 +1,10 @@
 import array
 
-
+def scale_object(object, scale):
+    for face in object:
+        for vertex in face:
+            for coordinate in vertex:
+                coordinate *= scale
 
 def parse_into_objects(file='') :
     f = open(file)

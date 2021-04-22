@@ -5,11 +5,11 @@ from Matrix import Matrix
 class Camera :
     
     # stores view as array of brightness values.
-    camera_view = array.array('f')
+    camera_view = []
     width = 0
     width = 0
     scene = None
-    max_rendering_depth = 70
+    max_rendering_depth = 1000
     _field_of_view = math.pi/2 # dictates how far away projection screen should be from camera
     # row-major ordered. X, Y, Z, Translation
     # defaults to identity matrix (no change)
@@ -35,12 +35,20 @@ class Camera :
 
      #casts primary ray through center of each pixel
     def generate_frame(self):
+        pixel = 0
+        max_frames = len(self.camera_view) * len(self.camera_view[0])
         for x in range(len(self.camera_view)):
+            this_line = array.array('f')
             for y in range(len(self.camera_view[0])):
+                pixel += 1
                 ray = self.primary_ray(x, y)
                 brightness_at_pixel = self.brightness_from_cast(ray)
-                self.camera_view[x][y] = brightness_at_pixel
-    
+                this_line.append(brightness_at_pixel)
+                if(pixel%100==0):
+                    print("generating pixel %d out of %d" % (pixel, max_frames))
+            self.camera_view[x] = (this_line)
+            
+
 
 
     # NAME:

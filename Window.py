@@ -3,11 +3,13 @@ import signal
 import sys
 from Camera import Camera
 from Scene import Scene
+import ObjectProcessing
 
 class Window :
 
     #ASCII grayscale march, credit to Paul Bourke
-    _ascii_grayscale="$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
+    #_ascii_grayscale="$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1\{\}[]?-_+~<>i!lI;:,\"^`'. "
+    _ascii_grayscale=" .'`^\",:;Il!i><~+_-?][\}\{1)(|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
     #goes like this: if >previousbrightness and LE next one, it gets that ones character#
     #The string to be printed to the console.
     _output_string=""
@@ -32,62 +34,59 @@ class Window :
                 thisRow.append(0)
             self.window.append(thisRow)
     
+
+
     def _create_kernel(self) :
         for row in range(self._character_height):
             for column in range(self._character_width):
                 self._kernel.append(1/(self._character_height*self._character_width))
 
-    def compute_characters_from_pixels(self):
-        return(
-            self._window_height//self._character_height, 
-            self._window_width//self._character_width)
+
+    def generate_output_string(self):
+        for i in range(0, len(self.window), 6):
+            for j in range(0, len(self.window[0]), 4):
+                mean = (1/24) * (self.window[i  ][j] + self.window[i  ][j+1] + self.window[i  ][j+2] + self.window[i  ][j+3]+
+                                 self.window[i+1][j] + self.window[i+1][j+1] + self.window[i+1][j+2] + self.window[i+1][j+3]+
+                                 self.window[i+2][j] + self.window[i+2][j+1] + self.window[i+2][j+2] + self.window[i+2][j+3]+
+                                 self.window[i+3][j] + self.window[i+3][j+1] + self.window[i+3][j+2] + self.window[i+3][j+3]+
+                                 self.window[i+4][j] + self.window[i+4][j+1] + self.window[i+4][j+2] + self.window[i+4][j+3]+
+                                 self.window[i+5][j] + self.window[i+5][j+1] + self.window[i+5][j+2] + self.window[i+5][j+3])
+                mean = int(mean*70)
+                self._output_string += self._ascii_grayscale[mean]
+                # self._output_string += str(mean)
+            self._output_string += "\n"
+
+
 
     def display_frame(self):
         #TODO: set cursor to the back
         print(self._output_string)
 
 
-    # getters and setters
-
-    def get_window_width(self):
-        return _window_width
-    
-    def get_window_height(self):
-        return _window_height
-
-    def set_character_height(self, new_height):
-        self._character_height = new_height
-    
-    def set_character_width(self, new_width):
-        self._character_width = new_width
-
-
 if __name__ == '__main__':
     window = Window()
     scene = Scene()
-    camera = Camera(800, 600, scene)
-    camera.scene.insert_object([
-        [[-1, -1,  0], [ 1,  1,  0], [-1,  1,  0]],
-        [[-1, -1,  0], [ 1,  1,  0], [ 1, -1,  0]],
-        [[-1, -1,  0], [-1, -1, -2], [-1,  1,  0]],
-        [[-1, -1, -2], [-1,  1, -2], [-1,  1,  0]],
-        [[-1,  1,  0], [-1,  1, -2], [ 1,  1,  0]],
-        [[-1,  1, -2], [ 1,  1, -2], [ 1,  1,  0]],
-        [[-1, -1, -2], [-1,  1, -2], [ 1,  1, -2]],
-        [[-1, -1, -2], [ 1,  1, -2], [ 1, -1, -2]],
-        [[ 1,  1, -2], [ 1, -1, -2], [ 1,  1,  0]],
-        [[ 1, -1, -2], [ 1,  1,  0], [ 1, -1,  0]],
-        [[-1, -1, -2], [ 1, -1, -2], [ 1, -1,  0]],
-        [[-1, -1,  0], [-1, -1, -2], [ 1,- 1,  0]],
-        ], (0, 0, -2))#TODO: insert object
+    camera = Camera(80, 60, scene)
     
+
+    tree = ObjectProcessing.parse_into_objects("Assets/lowpolytree.obj")[2]
+    ObjectProcessing.scale_object(tree, 0.002)
+    camera.scene.insert_object(tree, (60, 60, -1500))
+    # camera.scene.insert_object(default_triangle, (4, 2, -6))
+
+
     camera.generate_frame()
-    print(camera.camera_view)
-    while True:
-        try:
-            pass
-            #window.display_frame()
-        except KeyboardInterrupt:
-            print('Closing...')
-            sys.exit(0)
+    window.window = camera.camera_view
+    window.generate_output_string()
+    window.display_frame()
+    # while True:
+    #     try:
+    #         camera.generate_frame()
+    #         window.window = camera.camera_view
+    #         #print(window.window)
+    #         window.generate_output_string()
+    #         window.display_frame()
+    #     except KeyboardInterrupt:
+    #         print('Closing...')
+    #         sys.exit(0)
 
