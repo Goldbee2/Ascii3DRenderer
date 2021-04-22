@@ -66,16 +66,17 @@ class Window :
 if __name__ == '__main__':
     window = Window()
     scene = Scene()
-    camera = Camera(96, 96, scene)
+    camera = Camera(120, 72, scene)
     
 
-    tree = ObjectProcessing.parse_into_objects("Assets/lowpolytree.obj")[2]
-    test = []
-    test.append(tree[0])
-    print(test)
+    # tree = ObjectProcessing.parse_into_meshes("Assets/lowpolytree.obj")[2]
+    # print(tree)
     # ObjectProcessing.scale_object(tree, 0)
-    camera.scene.insert_object(tree, (1000, 1000, -30))
+    # camera.scene.insert_object(tree, (1000, 1000, -30))
     # camera.scene.insert_object(default_triangle, (4, 2, -6))
+    sphere = ObjectProcessing.parse_into_meshes("Assets/mit_sphere.obj")[0]
+    ObjectProcessing.scale_mesh(sphere, 0.1)
+    camera.scene.insert_object(sphere, (100, 100, 1600))
 
 
     camera.generate_frame()

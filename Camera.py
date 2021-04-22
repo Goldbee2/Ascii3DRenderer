@@ -35,17 +35,17 @@ class Camera :
 
      #casts primary ray through center of each pixel
     def generate_frame(self):
-        pixel = 0
-        max_frames = len(self.camera_view) * len(self.camera_view[0])
+        # pixel = 0
+        # max_frames = len(self.camera_view) * len(self.camera_view[0])
         for x in range(len(self.camera_view)):
             this_line = array.array('f')
             for y in range(len(self.camera_view[0])):
-                pixel += 1
+                # pixel += 1
                 ray = self.primary_ray(x, y)
                 brightness_at_pixel = self.brightness_from_cast(ray)
                 this_line.append(brightness_at_pixel)
-                if(pixel%100==0):
-                    print("generating pixel %d out of %d" % (pixel, max_frames))
+                # if(pixel%100==0):
+                    # print("generating pixel %d out of %d" % (pixel, max_frames))
             self.camera_view[x] = (this_line)
             
 
@@ -86,8 +86,8 @@ class Camera :
     def find_nearest_intersection(self, ray) :
         nearest_intersection = ((-1, -1, -1), self.max_rendering_depth)
         closest_distance = self.max_rendering_depth
-        for object in self.scene.objects:
-            for triangle in object:
+        for mesh in self.scene.meshes:
+            for triangle in mesh.faces:
                 normal = self.calculate_normal(triangle) # vector cross product
                 this_intersection = self.ray_intersects(ray, triangle, normal)
                 if this_intersection[1] < closest_distance:
