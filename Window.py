@@ -66,12 +66,15 @@ class Window :
 if __name__ == '__main__':
     window = Window()
     scene = Scene()
-    camera = Camera(80, 60, scene)
+    camera = Camera(96, 96, scene)
     
 
     tree = ObjectProcessing.parse_into_objects("Assets/lowpolytree.obj")[2]
-    ObjectProcessing.scale_object(tree, 0.002)
-    camera.scene.insert_object(tree, (60, 60, -1500))
+    test = []
+    test.append(tree[0])
+    print(test)
+    # ObjectProcessing.scale_object(tree, 0)
+    camera.scene.insert_object(tree, (1000, 1000, -30))
     # camera.scene.insert_object(default_triangle, (4, 2, -6))
 
 

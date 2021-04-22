@@ -9,7 +9,7 @@ class Camera :
     width = 0
     width = 0
     scene = None
-    max_rendering_depth = 1000
+    max_rendering_depth = 600
     _field_of_view = math.pi/2 # dictates how far away projection screen should be from camera
     # row-major ordered. X, Y, Z, Translation
     # defaults to identity matrix (no change)
@@ -100,6 +100,7 @@ class Camera :
 
 
     def calculate_normal(self, triangle) :
+        
         vertex_0, vertex_1, vertex_2 = triangle
         
         edge_1 = Matrix.subtract(vertex_1, vertex_0)
@@ -112,7 +113,8 @@ class Camera :
 
 
     def ray_intersects(self, ray, triangle, normal):
-        no_intersection = ((0, 0, self.max_rendering_depth), self.max_rendering_depth)
+    
+        no_intersection = ((0, 0, self.max_rendering_depth+1), self.max_rendering_depth)
     
         vertex_0 = triangle[0]
         vertex_1 = triangle[1]
