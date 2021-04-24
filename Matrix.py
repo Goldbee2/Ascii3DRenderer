@@ -1,3 +1,5 @@
+import math
+
 class Matrix:
 
     @staticmethod
@@ -12,6 +14,14 @@ class Matrix:
     @staticmethod
     def scale(vector, scalar):
         return(vector[0]*scalar, vector[1]*scalar, vector[2]*scalar)
+
+
+
+    @staticmethod
+    def normalize(vector):
+        x, y, z = vector
+        magnitude = math.sqrt(vector[0]**2 + vector[1]**2 + vector[2]**2)
+        return (x/magnitude, y/magnitude, z/magnitude)
 
 
 
