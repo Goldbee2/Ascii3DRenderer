@@ -5,9 +5,11 @@ class Scene:
     
     def insert_object(self, mesh, origin):
         x, y, z = origin
-        for triangle in mesh.faces:
-            for vertex in triangle:
-                vertex[0] += x
-                vertex[1] += y
-                vertex[2] += z
+        for triangle in range(len(mesh.faces)):
+            for vertex in range(len(mesh.faces[triangle])):
+                mesh.faces[triangle][vertex] = (
+                    mesh.faces[triangle][vertex][0] + x,
+                    mesh.faces[triangle][vertex][1] + y,
+                    mesh.faces[triangle][vertex][2] + z)
+                
         self.meshes.append(mesh)
