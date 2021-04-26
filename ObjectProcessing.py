@@ -1,20 +1,25 @@
 import array
+import math
 
 class Mesh:
+
     faces = []
     bounding_box = [0, 0, 0]
     
+
     
-    def scale_mesh(self, scale):
-        for face in self.faces:
-            for vertex in face:
-                for i in range(len(vertex)):
-                    vertex[i] *= scale
+    def scale(self, scale):
+        for i in range(len(self.faces)):
+            for j in range(len(self.faces[i])):
+                self.faces[i][j] = (
+                    self.faces[i][j][0] * scale[0],
+                    self.faces[i][j][1] * scale[1],
+                    self.faces[i][j][2] * scale[2])
         self.create_bounding_box()
 
 
 
-    def translate_mesh(self, translation):
+    def translate(self, translation):
         for i in range(len(self.faces)):
             for j in range(len(self.faces[i])):
                 self.faces[i][j] = (
@@ -22,6 +27,41 @@ class Mesh:
                 self.faces[i][j][1] + translation[1],
                 self.faces[i][j][2] + translation[2])
         self.create_bounding_box()
+
+
+
+    #   |1     0           0| |x|   |        x        |   |x'|
+    #   |0   cos θ    −sin θ| |y| = |y cos θ − z sin θ| = |y'|
+    #   |0   sin θ     cos θ| |z|   |y sin θ + z cos θ|   |z'|
+    # credit: stackoverflow user legends2k
+    def rotate_x(self, angle):
+        angle = math.radians(angle)
+        for i in range(len(self.faces)):
+            for j in range(len(self.faces[i])):
+
+                x, y, z = self.faces[i][j]
+                x2 =  x * math.cos(angle) + z * math.sin(angle)
+                y2 =  y
+                z2 = -x * math.sin(angle) + z * math.cos(angle)
+
+                self.faces[i][j] = (x2, y2, z2)
+
+
+    #   | cos θ    0   sin θ| |x|   | x cos θ + z sin θ|   |x'|
+    #   |   0      1       0| |y| = |         y        | = |y'|
+    #   |−sin θ    0   cos θ| |z|   |−x sin θ + z cos θ|   |z'|
+    # credit: stackoverflow user legends2k
+    def rotate_y(self, angle):
+        3
+
+
+    #   |cos θ   −sin θ   0| |x|   |x cos θ − y sin θ|   |x'|
+    #   |sin θ    cos θ   0| |y| = |x sin θ + y cos θ| = |y'|
+    #   |  0       0      1| |z|   |        z        |   |z'|
+    # credit: stackoverflow user legends2k
+    def rotate_z(self, angle):
+        d
+
 
 
     def create_bounding_box(self):
@@ -58,24 +98,32 @@ def parse_into_meshes(file='') :
     f = open(file)
     meshes = []
     mesh_start_lines = array.array('i')
-    verts = {}
-    vertex_count = 0
+    verts = create_vertex_dict(file)
     i = 0
     for line in f.readlines():
         i+=1
         if line.startswith('o '):
             mesh_start_lines.append(i)
+    for i in mesh_start_lines:
+        meshes.append(create_mesh(file, i, verts))
+    return meshes
+
+
+
+def create_vertex_dict(file):
+    f = open(file)
+    verts={}
+    vertex_index = 0
+    for line in f.readlines():
         if line.startswith("v "):
-            vertex_count += 1
-            x, y, z = line[1:-1].split()
+            vertex_index+=1
+            x, y, z = line[1:].split()
             xyz = array.array('f')
             xyz.append(float(x))
             xyz.append(float(y))
             xyz.append(float(z))
-            verts[vertex_count] = xyz 
-    for i in mesh_start_lines:
-        meshes.append(create_mesh(file, i, verts))
-    return meshes
+            verts[vertex_index] = xyz
+    return verts
 
 
 
@@ -87,13 +135,14 @@ def create_mesh(file, line, vertices):
     for line in f.readlines()[line:]:
         if line.startswith("f "):
             line_faces = []
-            for item in line.split(' ')[1:-1]:
+            for item in line.split(' ')[1:]:
                 line_faces.append(vertices[int(item.split('/')[0])])
             faces.append(line_faces)
         if line.startswith("o "):
              break
     
     new_mesh.faces = faces
+    print(new_mesh.faces)
     new_mesh.create_bounding_box()
     
     return new_mesh
