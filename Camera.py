@@ -8,8 +8,10 @@ class Camera :
     view = []
     width = 0
     height = 0
+    aspect_ratio = 0
+    fov = 0
     scene = None
-    max_rendering_depth = 50
+    max_rendering_depth = 60
     _field_of_view = math.pi/2 # dictates how far away projection screen should be from camera
     # row-major ordered. X, Y, Z, Translation
     # defaults to identity matrix (no change)
@@ -21,10 +23,12 @@ class Camera :
 
 
 
-    def __init__(self, width, height, scene) :
+    def __init__(self, width, height, aspect_ratio, scene, fov) :
         self.scene = scene
         self.width = width
         self.height = height
+        self.aspect_ratio = aspect_ratio
+        self.fov = fov
         for i in range(height):
             new_row = []
             for j in range(width):
@@ -35,38 +39,48 @@ class Camera :
 
      #casts primary ray through center of each pixel
     def generate_frame(self):
-        # pixel = 0
-        # max_frames = len(self.camera_view) * len(self.camera_view[0])
         for row in range(len(self.view)):
             this_line = array.array('f')
+
             for col in range(len(self.view[0])):
-                # pixel += 1
-                x, y = self.matrix_to_world(row, col)
-                ray = self.primary_ray(x, y)
+                x, y = self.matrix_to_xy(row, col)
+                x, y = self.xy_to_canvas(x, y)
+                ray = self.primary_ray(x, y, -1)
                 brightness_at_pixel = self.brightness_from_cast(ray)
                 this_line.append(brightness_at_pixel)
-                # if(pixel%100==0):
-                    # print("generating pixel %d out of %d" % (pixel, max_frames))
+
             self.view[row] = (this_line)
-            
-    def matrix_to_world(self, row, column):
-        width = self.width
-        height = self.height
-        x = column - (width/2)
-        y = ((row * -1) + (height/2)) * 1.8
+
+
+
+    def matrix_to_xy(self, row, column):
+
+        x = column - (self.width / 2)
+        y = (row * -1) + (self.height / 2)
+
         return x, y
 
+
+
+    def xy_to_canvas(self, x, y):
+        
+        canvas_distance = -1 #here to clarify math in case a different distance is used
+        canvas_width = 2*(math.tan(math.radians(self.fov) / 2 * canvas_distance))
+        canvas_height = canvas_width / 1.1
+
+        x = x / self.width * canvas_width
+        y = y / self.height * canvas_height
+
+        return x, y
+    
+    
 
     # NAME:
     # INPUTS:
     # OUTPUTS:
-    def primary_ray(self, x, y) :
-        #return vector representing ray through center of pixel (x,y)?
-        out_x = (y-(self.width/2))
-        out_y = ((self.height/2)-x)
-        z = -1
+    def primary_ray(self, x, y, z) :
         #each vector has [x.5, y.5, -1]
-        magnitude = math.sqrt(x**2 + y**2 + z**2)
+        magnitude = Matrix.magnitude((x, y, z))
         #divide x, y, -1 by magnitude to get direction(unit) vector.
         return (x/magnitude, y/magnitude, z/magnitude)
 
@@ -142,9 +156,8 @@ class Camera :
         # print("D: %s" % str(D))
         A, B, C = normal
         # check if ray and plane are (almost) parallel
-        # if D < 0:
-        #     return no_intersection
-        
+        if Matrix.dot_product(normal, ray) > -0.001:
+            return no_intersection      
         t = (Matrix.dot_product(normal, origin) + D) / Matrix.dot_product(normal, ray)
         # print("t: %s" % str(t))
         # if the triangle is behind the camera or too far away
