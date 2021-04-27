@@ -5,7 +5,8 @@ from Camera import Camera
 from Scene import Scene
 import ObjectProcessing
 import DefaultObject
-
+import os
+import time
 
 class Window :
 
@@ -30,9 +31,6 @@ class Window :
 
     camera = None
 
-    def __init__(self):
-        self._create_kernel()
-
 
     def _create_kernel(self) :
         for row in range(self._character_height):
@@ -41,7 +39,7 @@ class Window :
 
 
     def generate_output_string(self):
-        self._output_string += "\n\n\n\n"
+        self._output_string="\n\n\n\n"
         for i in range(len(self.camera.view)):
             for j in range(len(self.camera.view[0])):
                 # mean = (1/24) * (self.window[i  ][j] + self.window[i  ][j+1] + self.window[i  ][j+2] + self.window[i  ][j+3]+
@@ -68,7 +66,7 @@ if __name__ == '__main__':
     
     camera_width = input("Please enter the camera width: ")
     camera_height = input("Please enter the camera height: ")
-    window.camera = Camera(int(camera_width), int(camera_height), (1/1.8), scene, 90)
+    window.camera = Camera(int(camera_width), int(camera_height), scene, 90)
     
     # tree = ObjectProcessing.parse_into_meshes("Assets/lowpolytree.obj")[2]
     # print(tree.faces)
@@ -76,9 +74,6 @@ if __name__ == '__main__':
     # window.camera.scene.insert_object(tree, (0, -20, -30))
 
     sphere = ObjectProcessing.parse_into_meshes("Assets/default_sphere.obj")[0]
-    for i in sphere.faces:
-        for j in i:
-            print(type(j))
     sphere.scale((1, 1, 1))
     # window.camera.scene.insert_object(sphere, (0, 0, -5))
     # sphere.create_bounding_box()
@@ -95,7 +90,7 @@ if __name__ == '__main__':
     window.camera.generate_frame()
     window.generate_output_string()
     window.display_frame()
-
+    os.system('setterm -cursor off')
     while True:
         try:
             # sphere.translate_mesh((0, 0, -2))
@@ -115,8 +110,11 @@ if __name__ == '__main__':
             # sphere.translate_mesh((1, 0, 0))
             # test_triangle.translate_mesh((0, 0, 1))
             window.camera.generate_frame()
+            
             window.generate_output_string()
             window.display_frame()
+            
+            time.sleep(0.1)
         except KeyboardInterrupt:
             print('Closing...')
             sys.exit(0)
