@@ -23,11 +23,11 @@ class Camera :
 
 
 
-    def __init__(self, width, height, aspect_ratio, scene, fov) :
+    def __init__(self, width, height, scene, fov) :
         self.scene = scene
         self.width = width
         self.height = height
-        self.aspect_ratio = aspect_ratio
+        self.aspect_ratio = height/width
         self.fov = fov
         for i in range(height):
             new_row = []
@@ -66,7 +66,7 @@ class Camera :
         
         canvas_distance = -1 #here to clarify math in case a different distance is used
         canvas_width = 2*(math.tan(math.radians(self.fov) / 2 * canvas_distance))
-        canvas_height = canvas_width / 1.1
+        canvas_height = canvas_width * 1.8*self.aspect_ratio
 
         x = x / self.width * canvas_width
         y = y / self.height * canvas_height
