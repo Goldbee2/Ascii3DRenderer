@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import array
 import math
 
@@ -31,8 +33,8 @@ class Mesh:
 
 
     #   |1     0           0| |x|   |        x        |   |x'|
-    #   |0   cos θ    −sin θ| |y| = |y cos θ − z sin θ| = |y'|
-    #   |0   sin θ     cos θ| |z|   |y sin θ + z cos θ|   |z'|
+    #   |0   cos t    −sin t| |y| = |y cos t − z sin t| = |y'|
+    #   |0   sin t     cos t| |z|   |y sin t + z cos t|   |z'|
     # credit: stackoverflow user legends2k
     def rotate_x(self, angle):
         angle = math.radians(angle)
@@ -47,16 +49,16 @@ class Mesh:
                 self.faces[i][j] = (x2, y2, z2)
 
 
-    #   | cos θ    0   sin θ| |x|   | x cos θ + z sin θ|   |x'|
+    #   | cos t    0   sin t| |x|   | x cos t + z sin t|   |x'|
     #   |   0      1       0| |y| = |         y        | = |y'|
-    #   |−sin θ    0   cos θ| |z|   |−x sin θ + z cos θ|   |z'|
+    #   |−sin t    0   cos t| |z|   |−x sin t + z cos t|   |z'|
     # credit: stackoverflow user legends2k
     def rotate_y(self, angle):
         3
 
 
-    #   |cos θ   −sin θ   0| |x|   |x cos θ − y sin θ|   |x'|
-    #   |sin θ    cos θ   0| |y| = |x sin θ + y cos θ| = |y'|
+    #   |cos t   −sin t   0| |x|   |x cos t − y sin t|   |x'|
+    #   |sin t    cos t   0| |y| = |x sin t + y cos t| = |y'|
     #   |  0       0      1| |z|   |        z        |   |z'|
     # credit: stackoverflow user legends2k
     def rotate_z(self, angle):
@@ -142,7 +144,6 @@ def create_mesh(file, line, vertices):
              break
     
     new_mesh.faces = faces
-    print(new_mesh.faces)
     new_mesh.create_bounding_box()
     
     return new_mesh
