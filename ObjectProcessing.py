@@ -42,9 +42,9 @@ class Mesh:
             for j in range(len(self.faces[i])):
 
                 x, y, z = self.faces[i][j]
-                x2 =  x * math.cos(angle) + z * math.sin(angle)
-                y2 =  y
-                z2 = -x * math.sin(angle) + z * math.cos(angle)
+                x2 =  x
+                y2 =  y * math.cos(angle) - z * math.sin(angle)
+                z2 = y * math.sin(angle) + z * math.cos(angle)
 
                 self.faces[i][j] = (x2, y2, z2)
 
@@ -54,7 +54,16 @@ class Mesh:
     #   |−sin t    0   cos t| |z|   |−x sin t + z cos t|   |z'|
     # credit: stackoverflow user legends2k
     def rotate_y(self, angle):
-        3
+        angle = math.radians(angle)
+        for i in range(len(self.faces)):
+            for j in range(len(self.faces[i])):
+
+                x, y, z = self.faces[i][j]
+                x2 =  x * math.cos(angle) + z * math.sin(angle)
+                y2 =  y
+                z2 = -x * math.sin(angle) + z * math.cos(angle)
+
+                self.faces[i][j] = (x2, y2, z2)
 
 
     #   |cos t   −sin t   0| |x|   |x cos t − y sin t|   |x'|
@@ -62,7 +71,16 @@ class Mesh:
     #   |  0       0      1| |z|   |        z        |   |z'|
     # credit: stackoverflow user legends2k
     def rotate_z(self, angle):
-        d
+        angle = math.radians(angle)
+        for i in range(len(self.faces)):
+            for j in range(len(self.faces[i])):
+
+                x, y, z = self.faces[i][j]
+                x2 =  x * math.cos(angle) - y * math.sin(angle)
+                y2 =  x * math.sin(angle) + y * math.cos(angle)
+                z2 =  z
+
+                self.faces[i][j] = (x2, y2, z2)
 
 
 
@@ -120,11 +138,10 @@ def create_vertex_dict(file):
         if line.startswith("v "):
             vertex_index+=1
             x, y, z = line[1:].split()
-            xyz = array.array('f')
-            xyz.append(float(x))
-            xyz.append(float(y))
-            xyz.append(float(z))
-            verts[vertex_index] = xyz
+            x = float(x)
+            y = float(y)
+            z = float(z)
+            verts[vertex_index] = x, y, z
     return verts
 
 
@@ -137,8 +154,10 @@ def create_mesh(file, line, vertices):
     for line in f.readlines()[line:]:
         if line.startswith("f "):
             line_faces = []
-            for item in line.split(' ')[1:]:
-                line_faces.append(vertices[int(item.split('/')[0])])
+            for item in line.split()[1:]:
+                item = item.split('/')[0]
+                item = int(item)
+                line_faces.append(vertices[item])
             faces.append(line_faces)
         if line.startswith("o "):
              break
@@ -147,4 +166,3 @@ def create_mesh(file, line, vertices):
     new_mesh.create_bounding_box()
     
     return new_mesh
-

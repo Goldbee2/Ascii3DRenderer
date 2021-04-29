@@ -11,7 +11,6 @@ import time
 class Window :
 
     #ASCII grayscale march, credit to Paul Bourke
-    #_ascii_grayscale="$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1\{\}[]?-_+~<>i!lI;:,\"^`'. "
     # _ascii_grayscale=" .'`^\",:;Il!i><~+_-?][\}\{1)(|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
     _ascii_grayscale = " .:-=+*#%@"
     _ascii_grayscale = " ->:il?%$&#B@@"
@@ -27,8 +26,6 @@ class Window :
     _character_width=4
     _character_height=6
 
-    _kernel = []
-
     camera = None
 
 
@@ -42,15 +39,8 @@ class Window :
         self._output_string="\n\n\n\n"
         for i in range(len(self.camera.view)):
             for j in range(len(self.camera.view[0])):
-                # mean = (1/24) * (self.window[i  ][j] + self.window[i  ][j+1] + self.window[i  ][j+2] + self.window[i  ][j+3]+
-                                #  self.window[i+1][j] + self.window[i+1][j+1] + self.window[i+1][j+2] + self.window[i+1][j+3]+
-                                #  self.window[i+2][j] + self.window[i+2][j+1] + self.window[i+2][j+2] + self.window[i+2][j+3]+
-                                #  self.window[i+3][j] + self.window[i+3][j+1] + self.window[i+3][j+2] + self.window[i+3][j+3]+
-                                #  self.window[i+4][j] + self.window[i+4][j+1] + self.window[i+4][j+2] + self.window[i+4][j+3]+
-                                #  self.window[i+5][j] + self.window[i+5][j+1] + self.window[i+5][j+2] + self.window[i+5][j+3])
                 brightness_index=int(self.camera.view[i][j]*13)
                 self._output_string += self._ascii_grayscale[brightness_index]
-                # self._output_string += str(mean)
             self._output_string += " \n"
 
 
@@ -66,55 +56,82 @@ if __name__ == '__main__':
     
     camera_width = input("Please enter the camera width: ")
     camera_height = input("Please enter the camera height: ")
-    window.camera = Camera(int(camera_width), int(camera_height), scene, 90)
+    window.camera = Camera(int(camera_width), int(camera_height), scene, 100)
     
     # tree = ObjectProcessing.parse_into_meshes("Assets/lowpolytree.obj")[2]
-    # print(tree.faces)
-    # tree.scale_mesh(0.1)
-    # window.camera.scene.insert_object(tree, (0, -20, -30))
+    # tree.scale((1, -1, 1))
+    # window.camera.scene.insert_object(tree, (0, 0, -30))
 
-    sphere = ObjectProcessing.parse_into_meshes("Assets/default_sphere.obj")[0]
-    sphere.scale((1, 1, 1))
-    # window.camera.scene.insert_object(sphere, (0, 0, -5))
-    # sphere.create_bounding_box()
-    # print(sphere.bounding_box)
+    # sphere = ObjectProcessing.parse_into_meshes("Assets/default_sphere.obj")[0]
+    # sphere.scale((1, 1, 1))
+    # window.camera.scene.insert_object(sphere, (0, 0, -4))
     
     unit_square = DefaultObject.UnitSquare()
     unit_square.scale((2, 2, 2))
-    window.camera.scene.insert_object(unit_square, (0, 0, -10))
+    window.camera.scene.insert_object(unit_square, (0, 0, -12))
+    # unit_square.rotate_y(45)
+    # unit_square_5 = DefaultObject.UnitSquare()
+    # unit_square_5.scale((8, 8, 8))
+    # window.camera.scene.insert_object(unit_square_5, (0, 0, -40))
 
-    unit_square_2 = DefaultObject.UnitSquare()
-    unit_square_2.scale((8, 8, 8))
-    window.camera.scene.insert_object(unit_square_2, (0, 0, -20))
+
+
+
+    unit_square_3 = DefaultObject.UnitSquare()
+    unit_square_3.scale((16, 6, 6))
+    # window.camera.scene.insert_object(unit_square_3, (0, -16, -30))
+
+    # unit_square_2 = DefaultObject.UnitSquare()
+    # unit_square_2.scale((24, 8, 8))
+    # window.camera.scene.insert_object(unit_square_2, (0, 0, -40))
+
+    # unit_square_4 = DefaultObject.UnitSquare()
+    # unit_square_4.scale((16, 6, 6))
+    # window.camera.scene.insert_object(unit_square_4, (0, 16, -30))
+
+    # tt = ObjectProcessing.Mesh()
+    # tt.faces = [[(0.0, -1.495895, -4.0), 
+    #             (0.636238, -1.272489, -3.537751), 
+    #             (-0.243016, -1.27249, -3.25206)]]
+    
+    # window.camera.scene.insert_object(tt, (0, 0, -8))
+    
+    # RAY:       (0.13097691563960823, 0.8251545685295318, -0.5495134080296649)
+    # TRIANGLE:  [(0.0, -1.495895, -12.0), 
+    #             (0.636238, -1.272489, -11.537751), 
+    #             (-0.243016, -1.27249, -11.25206)]
+    # INTERSECT: (7.621534986157959, 48.015670412795146, -31.976135979449396) 
+    # NORMAL:    (0.29291763632754786, 0.31862688007667905, 0.9014855348927591)
+    window.camera.ray_intersects((0.13097691563960823, 0.8251545685295318, -0.5495134080296649),
+                                    [(0.0, -1.495895, -12.0),
+                                    (0.636238, -1.272489, -11.537751),
+                                    (-0.243016, -1.27249, -11.25206)],
+                                    (0.29291763632754786, 0.31862688007667905, 0.9014855348927591))
 
     window.camera.generate_frame()
     window.generate_output_string()
     window.display_frame()
     os.system('setterm -cursor off')
-    while True:
+
+    while 1:
+        # break
         try:
-            # sphere.translate_mesh((0, 0, -2))
-            # sphere.create_bounding_box()
-            # print(sphere.bounding_box)
-            # unit_square.scale((1, -1, 1))
+            unit_square.rotate_x(1)
+            # unit_square_5.rotate_z(6)
+
+
+            # unit_square_2.rotate_y(6)
+            unit_square_3.rotate_y(-7)
+            # unit_square_4.rotate_y(-5)
+            # tt.rotate_x(2)
+            # sphere.rotate_x(6)
             
-            # sphere.scale((0.1, 0.1, 0.1))
-            # sphere.translate((0, -2, 0))
-            unit_square.rotate_x(-2)
-            unit_square_2.rotate_x(2)
-            # for mesh in window.camera.scene.meshes:
-                # mesh.translate((0, 0, -0.02))
-                # mesh.rotate_x(2)
-            #print(window.window)
-            # print(window.camera.view)
-            # sphere.translate_mesh((1, 0, 0))
-            # test_triangle.translate_mesh((0, 0, 1))
+
             window.camera.generate_frame()
-            
             window.generate_output_string()
             window.display_frame()
-            
-            time.sleep(0.1)
+            time.sleep(0.01)
+
         except KeyboardInterrupt:
             print('Closing...')
             sys.exit(0)
