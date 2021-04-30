@@ -3,7 +3,7 @@ import array
 from Matrix import Matrix
 
 class Camera :
-    
+
     # stores view as array of brightness values.
     view = []
     width = 0
@@ -12,14 +12,6 @@ class Camera :
     fov = 0
     scene = None
     max_rendering_depth = 60
-    _field_of_view = math.pi/2 # dictates how far away projection screen should be from camera
-    # row-major ordered. X, Y, Z, Translation
-    # defaults to identity matrix (no change)
-    # thank you to songho.ca/opengl/gl_camera for help understanding camera transformation matrices.
-    transformation_matrix = [[1, 0, 0, 0],
-                                    [0, 1, 0, 0],
-                                    [0, 0, 1, 0],
-                                    [0, 0, 0, 1]]
 
 
 
@@ -37,14 +29,11 @@ class Camera :
 
 
 
-     #casts primary ray through center of each pixel
     def generate_frame(self):
         for row in range(len(self.view)):
             this_line = array.array('f')
 
             for col in range(len(self.view[0])):
-                # print("PIXEL: ", end='')
-                # print(row,col)
                 ray = self.primary_ray(row, col, -1)
                 brightness_at_pixel = self.brightness_from_cast(ray)
                 
@@ -53,15 +42,11 @@ class Camera :
             self.view[row] = (this_line)
 
 
-    # NAME:
-    # INPUTS:
-    # OUTPUTS:
+
     def primary_ray(self, x, y, z) :
         x, y = self.matrix_to_xy(x, y)
         x, y = self.xy_to_canvas(x, y)
-        #each vector has [x.5, y.5, -1]
-        magnitude = 1 # Matrix.magnitude((x, y, z))
-        #divide x, y, -1 by magnitude to get direction(unit) vector.
+        magnitude = Matrix.magnitude((x, y, z))
         return (x/magnitude, y/magnitude, z/magnitude)
 
 
@@ -88,35 +73,27 @@ class Camera :
     
     
 
-    # returns a brightness value
-    #NOTE: in total, the brightness of a pixel consists of: angle to light, distance from light->light's distance function,
-    #           if it's in shadow, and distance from origin
     def brightness_from_cast(self, ray):
         intersection, depth = self.find_nearest_intersection(ray)
-        # print(intersection, depth)
-        #for light in scene:
-        #    pass
-            #cast ray to light
-            #if it's not obstructed, brightness of light = brightness of light -> individual light's distance function.
-            #if intersection, is in shadow. ?brightness *= 0.5?
-        # brightness = (1 / (0.2 * depth + 1)) if depth >= 0 else 0
         brightness = 1-(depth/self.max_rendering_depth)
         return brightness 
 
 
 
-    #returns point, its normal, and its distance as a tuple
     def find_nearest_intersection(self, ray) :
         nearest_intersection = ((0, 0, 1), self.max_rendering_depth)
         closest_distance = self.max_rendering_depth
+        
         for mesh in self.scene.meshes:
+            
             for triangle in mesh.faces:
                 normal = self.calculate_normal(triangle) # vector cross product
                 this_intersection = self.ray_intersects(ray, triangle, normal)
+                
                 if this_intersection[1] < closest_distance:
                     closest_distance = this_intersection[1]
                     nearest_intersection = this_intersection
-        # print("ray: %s intersection: %s" % (str(ray), str(nearest_intersection)))
+        
         return (nearest_intersection)
 
 
@@ -132,9 +109,12 @@ class Camera :
         return normal
 
 
-#FIXME: depth from origin calculated incorrectly. It should be the magnitude of the intersection vector.
+
     def ray_intersects(self, ray, triangle, normal):
-    
+        """
+        A method to detect ray-triangle intersection.
+        """
+
         no_intersection = ((0, 0, 10), self.max_rendering_depth+1)
 
         vertex_0 = triangle[0]
@@ -152,28 +132,26 @@ class Camera :
         # where A, B, and C are the components of the normal to the plane
         # and x, y, and z are the coordinates of any point on the plane
         # and D is the distance from the origin to the plane, parallel to the normal,
-        D = Matrix.dot_product(normal, vertex_0)
-        # print("D: %s" % str(D))
-        
         A, B, C = normal
+        D = Matrix.dot_product(normal, vertex_0)
+        
         # check if ray and plane are (almost) parallel
         if abs(Matrix.dot_product(normal, ray)) < 0.01:
-            return no_intersection      
+            return no_intersection
+ 
         t = (Matrix.dot_product(normal, origin) + D) / Matrix.dot_product(normal,ray)
-        # print("t: %s" % str(t))
         # if the triangle is behind the camera or too far away
         if (t > self.max_rendering_depth+1) or (t < 0):
             return no_intersection
 
         intersection_point =  Matrix.scale(ray, t)
-        # print("intersection point: %s" % str(intersection_point))
         
+        # Right hand intersection test
         edge_0 = Matrix.subtract(vertex_1, vertex_0)
         perpendicular_vector_0 = Matrix.subtract(intersection_point, vertex_0)
         C = Matrix.cross_product(edge_0, perpendicular_vector_0)
         N = Matrix.dot_product(C, normal)
         if(N < 0) :
-            # print("Case 1 failed")
             return no_intersection
         
         edge_1 = Matrix.subtract(vertex_2, vertex_1)
@@ -181,7 +159,6 @@ class Camera :
         C = Matrix.cross_product(edge_1, perpendicular_vector_1)
         N = Matrix.dot_product(C, normal)
         if(N < 0) :
-            # print("Case 2 failed")
             return no_intersection
         
         edge_2 = Matrix.subtract(vertex_0, vertex_2)
@@ -189,41 +166,10 @@ class Camera :
         C = Matrix.cross_product(edge_2, perpendicular_vector_2) 
         N = Matrix.dot_product(C, normal)
         if(N < 0) :
-            # print("Case 3 failed")
             return no_intersection
         
-        # print("ray", ray)
-        # print("triangle", triangle)
-        # print("t", t)
-        # print("d", D)
-        # print("intersection_point", intersection_point)
-        # print("normaldotorigin", Matrix.dot_product(normal, origin))
-        # print("normaldotray", Matrix.dot_product(normal, origin))
         return (intersection_point, t)
 
 
     def shadow_ray(self, pointA, pointB):
         pass
-
-
-
-    def camera_x_axis(self) :
-        return self.transformation_matrix[0]
-    
-    def camera_y_axis(self) :
-        return self.transformation_matrix[1]
-
-    def camera_z_axis(self) :
-        return self.transformation_matrix[2]
-    
-    def camera_translation(self) :
-        return self.transformation_matrix[3]
-
-
-
-    # #probably wrong
-    # def compute_ray_direction(self, x, y, z, width, height) :
-    #     return((x - width / 2),
-    #            (height / 2 - y),
-    #            (-(height/2) / math.tan(self._field_of_view*0.5)))
-

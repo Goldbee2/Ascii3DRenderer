@@ -51,11 +51,3 @@ class Matrix:
     def magnitude(vector):
         x, y, z = vector
         return math.sqrt(x**2 + y**2 + z**2)
-
-D = Matrix.dot_product((0.29291763632754786, 0.31862688007667905, 0.9014855348927591), (0.0, -1.495895, -12.0))
-print("D: %f" % D)
-nor_or = Matrix.dot_product((0.29291763632754786, 0.31862688007667905, 0.9014855348927591), (0,0,0))
-print("NORMAL,ORIGIN: %f" % nor_or)
-nor_ra = Matrix.dot_product((0.29291763632754786, 0.31862688007667905, 0.9014855348927591), (0.13097691563960823, 0.8251545685295318, -0.5495134080296649))
-print("NORMAL, RAY: %f" % nor_ra)
-print("t: %f" % ((nor_or + D)/nor_ra))
