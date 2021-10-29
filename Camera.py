@@ -11,7 +11,7 @@ class Camera :
     aspect_ratio = 0
     fov = 0
     scene = None
-    max_rendering_depth = 60
+    max_rendering_depth = 30
 
 
 
@@ -46,8 +46,8 @@ class Camera :
     def primary_ray(self, x, y, z) :
         x, y = self.matrix_to_xy(x, y)
         x, y = self.xy_to_canvas(x, y)
-        magnitude = Matrix.magnitude((x, y, z))
-        return (x/magnitude, y/magnitude, z/magnitude)
+        xyz = Matrix.normalize((x, y, z))
+        return xyz
 
 
 
@@ -63,8 +63,8 @@ class Camera :
     def xy_to_canvas(self, x, y):
         
         canvas_distance = 1 #here to clarify math in case a different distance is used
-        canvas_width = 2*(math.tan(math.radians(self.fov) / 2 * canvas_distance))
-        canvas_height = canvas_width * 1.8*self.aspect_ratio
+        canvas_width = 2*(math.tan(math.radians(self.fov) / 2.0 * canvas_distance))
+        canvas_height = canvas_width * 1.8 * self.aspect_ratio
 
         x = x / self.width * canvas_width
         y = y / self.height * canvas_height
@@ -75,7 +75,7 @@ class Camera :
 
     def brightness_from_cast(self, ray):
         intersection, depth = self.find_nearest_intersection(ray)
-        brightness = 1-(depth/self.max_rendering_depth)
+        brightness = 1.0-(depth/self.max_rendering_depth)
         return brightness 
 
 
@@ -88,18 +88,17 @@ class Camera :
             
             for triangle in mesh.faces:
                 normal = self.calculate_normal(triangle) # vector cross product
-                this_intersection = self.ray_intersects(ray, triangle, normal)
+                intersects, intersection = self.ray_intersects(ray, triangle, normal)
                 
-                if this_intersection[1] < closest_distance:
-                    closest_distance = this_intersection[1]
-                    nearest_intersection = this_intersection
+                if intersects:
+                    closest_distance = intersection[1]
+                    nearest_intersection = intersection
         
         return (nearest_intersection)
 
 
-
+    
     def calculate_normal(self, triangle) :
-        
         vertex_0, vertex_1, vertex_2 = triangle
         
         edge_1 = Matrix.subtract(vertex_1, vertex_0)
@@ -115,7 +114,7 @@ class Camera :
         A method to detect ray-triangle intersection.
         """
 
-        no_intersection = ((0, 0, 10), self.max_rendering_depth+1)
+        no_intersection = (False, None)
 
         vertex_0 = triangle[0]
         vertex_1 = triangle[1]
@@ -136,40 +135,52 @@ class Camera :
         D = Matrix.dot_product(normal, vertex_0)
         
         # check if ray and plane are (almost) parallel
-        if abs(Matrix.dot_product(normal, ray)) < 0.01:
+        if Matrix.dot_product(normal, ray) < 0.0001:
             return no_intersection
  
         t = (Matrix.dot_product(normal, origin) + D) / Matrix.dot_product(normal,ray)
         # if the triangle is behind the camera or too far away
-        if (t > self.max_rendering_depth+1) or (t < 0):
+        if (t > self.max_rendering_depth) or (t < 0):
             return no_intersection
 
         intersection_point =  Matrix.scale(ray, t)
         
+        if(self.right_hand_test(triangle, intersection_point, t, normal)):
+            return (True, (intersection_point, t))
+        
+        return no_intersection
+        
+        
+
+
+    def right_hand_test(self, triangle, intersection, t, normal):
+        
+        """
+        Uses the right-hand intersection test to determine if a point is
+        within a triangle.
+        """
+
+        vertex_0, vertex_1, vertex_2 = triangle
         # Right hand intersection test
         edge_0 = Matrix.subtract(vertex_1, vertex_0)
-        perpendicular_vector_0 = Matrix.subtract(intersection_point, vertex_0)
+        perpendicular_vector_0 = Matrix.subtract(intersection, vertex_0)
         C = Matrix.cross_product(edge_0, perpendicular_vector_0)
         N = Matrix.dot_product(C, normal)
         if(N < 0) :
-            return no_intersection
+            return False
         
         edge_1 = Matrix.subtract(vertex_2, vertex_1)
-        perpendicular_vector_1 = Matrix.subtract(intersection_point, vertex_1)
+        perpendicular_vector_1 = Matrix.subtract(intersection, vertex_1)
         C = Matrix.cross_product(edge_1, perpendicular_vector_1)
         N = Matrix.dot_product(C, normal)
         if(N < 0) :
-            return no_intersection
+            return False
         
         edge_2 = Matrix.subtract(vertex_0, vertex_2)
-        perpendicular_vector_2 = Matrix.subtract(intersection_point, vertex_2)
+        perpendicular_vector_2 = Matrix.subtract(intersection, vertex_2)
         C = Matrix.cross_product(edge_2, perpendicular_vector_2) 
         N = Matrix.dot_product(C, normal)
         if(N < 0) :
-            return no_intersection
+            return False
         
-        return (intersection_point, t)
-
-
-    def shadow_ray(self, pointA, pointB):
-        pass
+        return True
