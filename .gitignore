@@ -2,3 +2,4 @@ __pycache__
 __pycache__/Camera.cpython-38.pyc
 __pycache__/Scene.cpython-38.pyc
 Assets/default_sphere.mtl
+*.pyc
